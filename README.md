@@ -1,62 +1,8 @@
-# SAP Mobile Cloud Platform service for Purchase Order Modifications using ODATA API
-
-A Node.js application that provides a bridge between SAP OData APIs for purchase orders and AI models via the Model Context Protocol (MCP).
-
-## Features
-
-- **Dual-Mode Operation**: Operates as both a standard API server and an MCP server for AI model integration
-- **SAP Integration**: Connects to SAP systems using OData APIs with optimized connectivity, connection pooling, and caching
-- **AI Model Support**: Integrates with OpenAI, Anthropic, and Ollama models through a unified interface
-- **Security**: Robust authentication, rate limiting, and sanitized error handling
-- **Production-Ready**: Optimized for performance, security, and reliability in production environments
-
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/sap-mmpur-mcp.git
-cd sap-mmpur-mcp
-
-# Install dependencies
-npm install
-
-# Copy and configure environment variables
-cp config/.env.example config/.env.production
-```
-
-## Configuration
-
-### Environment Variables
-
-Configure the application by editing the `.env` or `.env.production` file:
-
-```
-# Basic server configuration
-PORT=3000
-NODE_ENV=production
-
-# SAP connection details
-SAP_BASE_URL=https://your-sap-system.com/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV
-SAP_USERNAME=your_sap_username
-SAP_PASSWORD=your_secure_password
-SAP_CLIENT=100
-
-# Security settings
-API_KEY=your_secure_api_key
-JWT_SECRET=your_secure_jwt_secret
-
-# AI Model API Keys (if using MCP features)
-OPENAI_API_KEY=your_openai_key
-ANTHROPIC_API_KEY=your_anthropic_key
-```
-
-See `config/.env.example` for all available configuration options.
-
-## Model Context Protocol (MCP) Server
+# Model Context Protocol (MCP) Server
 
 The SAP-MMPUR-MCP includes a full-featured Model Context Protocol server that enables AI models to interact directly with SAP purchase order data. This protocol establishes a standardized way for LLMs (Large Language Models) to maintain contextual awareness across interactions and access enterprise data.
 
-### What is Model Context Protocol?
+## What is Model Context Protocol?
 
 Model Context Protocol (MCP) provides a standardized interface for:
 
