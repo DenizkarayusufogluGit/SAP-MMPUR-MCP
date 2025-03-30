@@ -1,0 +1,74 @@
+{
+  "projectName": "SAP-MMPUR-MCP",
+  "projectType": "node",
+  "description": "SAP Mobile Cloud Platform service for Purchase Order modifications using ODATA API",
+  "aiAssistance": {
+    "enabled": true,
+    "contextAwareness": {
+      "sapOdataApi": true,
+      "cloudFoundry": true,
+      "purchaseOrderDomain": true
+    }
+  },
+  "fileAssociations": {
+    "*.js": "javascript",
+    "*.json": "json",
+    "*.yml": "yaml",
+    "*.md": "markdown",
+    ".env*": "dotenv"
+  },
+  "search": {
+    "excludePatterns": [
+      "node_modules/**",
+      "dist/**",
+      "logs/**",
+      "*.log"
+    ]
+  },
+  "linting": {
+    "eslint": {
+      "enabled": true,
+      "configFile": ".eslintrc.js"
+    }
+  },
+  "formatters": {
+    "prettier": {
+      "enabled": true,
+      "configFile": ".prettierrc"
+    }
+  },
+  "suggestions": {
+    "sapCloud": {
+      "enabled": true,
+      "apiSnippets": true
+    },
+    "odata": {
+      "enabled": true,
+      "version": "4.0",
+      "snippets": true
+    }
+  },
+  "commands": {
+    "start": "npm start",
+    "dev": "npm run dev",
+    "test": "npm test",
+    "build": "npm run build",
+    "deploy": "npm run deploy"
+  },
+  "documentation": {
+    "links": [
+      {
+        "title": "SAP S/4HANA Cloud APIs",
+        "url": "https://api.sap.com/products/SAPS4HANACloud"
+      },
+      {
+        "title": "SAP Purchase Order API Documentation",
+        "url": "https://api.sap.com/api/API_PURCHASEORDER_PROCESS_SRV"
+      },
+      {
+        "title": "SAP BTP Documentation",
+        "url": "https://help.sap.com/docs/btp"
+      }
+    ]
+  }
+} 

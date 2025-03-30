@@ -1,0 +1,85 @@
+{
+  "model": "llama3",
+  "parameters": {
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "top_k": 40,
+    "num_ctx": 8192
+  },
+  "functions": [
+    {
+      "name": "query_purchase_orders",
+      "description": "Retrieve purchase orders from SAP system",
+      "parameters": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "description": "Specific purchase order ID to retrieve"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of purchase orders to return"
+          },
+          "filter": {
+            "type": "string",
+            "description": "OData filter expression to filter purchase orders"
+          }
+        }
+      }
+    },
+    {
+      "name": "create_purchase_order",
+      "description": "Create a new purchase order in SAP system",
+      "parameters": {
+        "type": "object",
+        "required": ["purchase_order_data"],
+        "properties": {
+          "purchase_order_data": {
+            "type": "object",
+            "description": "Purchase order data structure"
+          }
+        }
+      }
+    },
+    {
+      "name": "update_purchase_order",
+      "description": "Update an existing purchase order",
+      "parameters": {
+        "type": "object",
+        "required": ["order_id", "update_data"],
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "description": "Purchase order ID to update"
+          },
+          "update_data": {
+            "type": "object",
+            "description": "Fields to update in the purchase order"
+          }
+        }
+      }
+    }
+  ],
+  "routes": [
+    {
+      "path": "/api/ai/purchase-order-assistant",
+      "method": "POST",
+      "handler": {
+        "model": "llama3",
+        "system_prompt": "You are a purchase order processing assistant. Help users create, update, and retrieve purchase orders using natural language. Access to SAP MMPUR system is available through the API functions."
+      }
+    }
+  ],
+  "api_integration": {
+    "base_url": "http://localhost:3000",
+    "endpoints": {
+      "health": "/health",
+      "purchase_orders": "/api/purchaseOrder"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+} 

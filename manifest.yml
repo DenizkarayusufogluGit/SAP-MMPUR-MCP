@@ -1,0 +1,12 @@
+---
+applications:
+- name: sap-mmpur-mcp
+  path: dist
+  memory: 256M
+  instances: 1
+  buildpack: nodejs_buildpack
+  env:
+    NODE_ENV: production
+    # Set SAP_API_KEY in the environment variables during deployment
+    # or use service binding in SAP BTP
+    SAP_ODATA_BASE_URL: https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001/ 
