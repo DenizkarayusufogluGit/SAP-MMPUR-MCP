@@ -1,98 +1,343 @@
-# SAP-MMPUR-MCP
+# SAP Mobile Cloud Platform service for Purchase Order Modifications using ODATA API
 
-SAP Mobile Cloud Platform service for Purchase Order Modifications using ODATA API.
-
-## Overview
-
-This service acts as a middleware between mobile/frontend applications and SAP backend systems, specifically for purchase order management operations. It provides a RESTful API interface that connects to SAP's ODATA v4 services for purchase order processing.
+A Node.js application that provides a bridge between SAP OData APIs for purchase orders and AI models via the Model Context Protocol (MCP).
 
 ## Features
 
-- Create, read, update, and delete purchase orders
-- Integration with SAP backend using ODATA v4 protocol
-- API key authentication
-- Error handling and logging
-- Ready for deployment to SAP BTP (Cloud Foundry)
-- Ollama AI integration for natural language processing
-- Cursor IDE configuration for enhanced development experience
-
-## Prerequisites
-
-- Node.js 18 or higher
-- SAP API key (to be configured in environment variables)
-- Access to SAP S/4HANA Cloud Purchase Order OData V4 service
-- Cloud Foundry CLI (for deployment)
-- Ollama (optional, for AI features)
-- Cursor IDE (optional, for enhanced development)
+- **Dual-Mode Operation**: Operates as both a standard API server and an MCP server for AI model integration
+- **SAP Integration**: Connects to SAP systems using OData APIs with optimized connectivity, connection pooling, and caching
+- **AI Model Support**: Integrates with OpenAI, Anthropic, and Ollama models through a unified interface
+- **Security**: Robust authentication, rate limiting, and sanitized error handling
+- **Production-Ready**: Optimized for performance, security, and reliability in production environments
 
 ## Installation
 
-1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Copy the environment configuration:
-   ```
-   cp config/.env.example config/.env
-   ```
-4. Update the `.env` file with your own SAP API key
-5. Start the application:
-   ```
-   npm start
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/your-username/sap-mmpur-mcp.git
+cd sap-mmpur-mcp
 
-## Development
+# Install dependencies
+npm install
 
-For local development:
-```
-npm run dev
+# Copy and configure environment variables
+cp config/.env.example config/.env.production
 ```
 
-## Testing
+## Configuration
 
-Before deployment, test the API connection:
+### Environment Variables
+
+Configure the application by editing the `.env` or `.env.production` file:
+
 ```
-npm test
+# Basic server configuration
+PORT=3000
+NODE_ENV=production
+
+# SAP connection details
+SAP_BASE_URL=https://your-sap-system.com/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV
+SAP_USERNAME=your_sap_username
+SAP_PASSWORD=your_secure_password
+SAP_CLIENT=100
+
+# Security settings
+API_KEY=your_secure_api_key
+JWT_SECRET=your_secure_jwt_secret
+
+# AI Model API Keys (if using MCP features)
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
 ```
 
-This will:
-- Verify connectivity to the SAP API
-- Retrieve a sample of purchase orders
-- Display the response for verification
+See `config/.env.example` for all available configuration options.
+
+## Model Context Protocol (MCP) Server
+
+The SAP-MMPUR-MCP includes a full-featured Model Context Protocol server that enables AI models to interact directly with SAP purchase order data. This protocol establishes a standardized way for LLMs (Large Language Models) to maintain contextual awareness across interactions and access enterprise data.
+
+### What is Model Context Protocol?
+
+Model Context Protocol (MCP) provides a standardized interface for:
+
+1. **Context Management**: Create, store, retrieve, and update conversation context windows
+2. **Natural Language Processing**: Process natural language requests that query or manipulate SAP data
+3. **Multi-Model Support**: Use different AI models (OpenAI, Anthropic, Ollama) through a unified interface
+4. **Enterprise Data Access**: Bridge between AI models and enterprise systems like SAP
+
+### MCP Architecture
+
+The MCP server architecture consists of several key components:
+
+- **MCP Server (`mcpServer.js`)**: Express-based HTTP server implementing the protocol
+- **Context Manager (`mcpContextManager.js`)**: Manages conversation state and context windows
+- **Model Providers (`mcpModels.js`)**: Interfaces with AI models from different providers
+- **SAP Adapter (`mcpSapAdapter.js`)**: Translates between AI intent and SAP ODATA operations
+- **Authentication (`mcpAuth.js`)**: Secures access to the MCP server endpoints
+
+### MCP Capabilities
+
+The MCP server provides the following capabilities:
+
+#### 1. Context Management
+
+- Create and maintain context windows for persistent conversations
+- Track dialogue history between user and model
+- Store enterprise data within context windows
+- Manage context lifetimes and token limitations
+
+#### 2. AI Model Integration
+
+- Support for OpenAI models (GPT-3.5, GPT-4)
+- Support for Anthropic models (Claude)
+- Support for local models via Ollama (Llama-3, etc.)
+- Dynamic model selection based on query complexity
+- Unified response format across different models
+
+#### 3. SAP ODATA Connectivity
+
+- Convert natural language queries to structured SAP queries
+- Access purchase order data through semantic understanding
+- Perform CRUD operations on SAP entities
+- Handle SAP authentication and connection pooling
+
+#### 4. Security Features
+
+- API key and JWT authentication
+- Rate limiting for request throttling
+- Sanitized error handling for production
+- HTTPS support with proper certificate management
+- Protection against common web vulnerabilities
+
+### MCP Endpoints
+
+The MCP server exposes the following endpoints:
+
+#### Context Management
+
+```
+POST /api/context                - Create a new context window
+GET /api/context/:contextId      - Retrieve a context by ID
+PUT /api/context/:contextId      - Update a context with new content
+DELETE /api/context/:contextId   - Delete a context
+```
+
+#### Querying and Generation
+
+```
+POST /api/query                  - Process a natural language query with optional context
+POST /api/generate               - Generate content with a specified model
+```
+
+#### SAP Integration
+
+```
+GET /api/sap/purchaseOrder       - List purchase orders (supports natural language filtering)
+GET /api/sap/purchaseOrder/:id   - Get purchase order by ID
+POST /api/sap/purchaseOrder      - Create a purchase order
+PUT /api/sap/purchaseOrder/:id   - Update a purchase order
+DELETE /api/sap/purchaseOrder/:id - Delete a purchase order
+```
+
+#### Model Information
+
+```
+GET /api/models                  - List available AI models
+GET /api/models/:modelId/capabilities - Get capabilities of a specific model
+```
+
+### Implementing MCP Clients
+
+Here's how to implement a client that interacts with the MCP server:
+
+#### 1. Create a Context
+
+```bash
+curl -X POST https://your-server.com/api/context \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_api_key" \
+  -d '{
+    "model": "gpt-4",
+    "maxTokens": 8192
+  }'
+```
+
+Response:
+```json
+{
+  "status": "success",
+  "contextId": "ctx_abc123def456",
+  "message": "Context created successfully"
+}
+```
+
+#### 2. Query with Context
+
+```bash
+curl -X POST https://your-server.com/api/query \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_api_key" \
+  -d '{
+    "contextId": "ctx_abc123def456",
+    "query": "Find purchase orders from supplier ACME Corp with total value over $10,000"
+  }'
+```
+
+Response:
+```json
+{
+  "status": "success",
+  "result": {
+    "purchaseOrders": [
+      {
+        "id": "4500000123",
+        "supplier": "ACME Corp",
+        "totalValue": 12500.00,
+        "currency": "USD",
+        "createdAt": "2023-06-15"
+      },
+      {
+        "id": "4500000456",
+        "supplier": "ACME Corp",
+        "totalValue": 18750.00,
+        "currency": "USD",
+        "createdAt": "2023-08-22"
+      }
+    ],
+    "explanation": "I found 2 purchase orders from ACME Corp with a total value exceeding $10,000."
+  }
+}
+```
+
+#### 3. Update Context with New Information
+
+```bash
+curl -X PUT https://your-server.com/api/context/ctx_abc123def456 \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_api_key" \
+  -d '{
+    "operation": "append",
+    "content": {
+      "role": "user",
+      "content": "Show me details of purchase order 4500000123"
+    }
+  }'
+```
+
+### Advanced MCP Usage Scenarios
+
+#### Entity Extraction and Semantic Search
+
+The MCP server can extract entities from natural language and perform semantic searches:
+
+```bash
+curl -X POST https://your-server.com/api/query \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_api_key" \
+  -d '{
+    "contextId": "ctx_abc123def456",
+    "query": "Find late deliveries from European suppliers in Q1 2023"
+  }'
+```
+
+#### Multi-step Reasoning
+
+MCP supports multi-step reasoning through context windows:
+
+1. First query establishes context
+2. Model analyzes purchase order data
+3. User asks follow-up questions about specific details
+4. Context window maintains the conversation thread
+
+#### Data Transformation
+
+MCP can transform data between different formats:
+
+```bash
+curl -X POST https://your-server.com/api/query \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_api_key" \
+  -d '{
+    "contextId": "ctx_abc123def456",
+    "query": "Summarize the purchase orders from Q2 2023 by supplier and category in a table format"
+  }'
+```
+
+### Configuring MCP Server
+
+Key configuration options for the MCP server:
+
+```
+# MCP Server settings
+ENABLE_MCP=true
+MCP_PORT=3001
+MCP_HOST=0.0.0.0
+MCP_MAX_CONCURRENT_REQUESTS=20
+MCP_RESPONSE_TIMEOUT=60000
+
+# Context settings
+MCP_CONTEXT_WINDOW_SIZE=8192
+MCP_TOKEN_LIMIT_PER_REQUEST=4096
+
+# AI model configuration
+DEFAULT_AI_MODEL=gpt-4
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+OLLAMA_API_BASE_URL=http://localhost:11434
+```
+
+### Monitoring MCP Performance
+
+The MCP server provides several monitoring endpoints and metrics:
+
+- Health checks to ensure server is responsive
+- Request/response time tracking
+- Token usage monitoring
+- Context window analytics
+- Error rate tracking
+
+To view MCP server metrics:
+
+```bash
+curl -X GET https://your-server.com/metrics \
+  -H "x-api-key: your_api_key"
+```
+
+### MCP Implementation Best Practices
+
+1. **Context Management**: Implement context cleanup to prevent token accumulation
+2. **Error Handling**: Provide clear error messages that help diagnose issues
+3. **Security**: Always use HTTPS and proper authentication in production
+4. **Caching**: Implement caching for repetitive queries to reduce SAP load
+5. **Logging**: Configure appropriate logging levels for diagnostics
+6. **Rate Limiting**: Adjust rate limits based on expected traffic patterns
+7. **Model Selection**: Choose appropriate models based on query complexity
 
 ## Deployment Options
 
-### Git Repository Setup
+### Standard Node.js Deployment
 
-To set up a new Git repository:
+```bash
+# Start in production mode
+npm run start:prod
 
-1. Run the Git setup script:
-   ```
-   npm run git:setup
-   ```
-2. Follow the prompts to configure your repository
-3. Push to your remote repository:
-   ```
-   git push -u origin main
-   ```
+# Start in MCP mode
+npm run start:mcp
+```
 
 ### Docker Deployment
 
-Build and run with Docker:
+The application includes a production-ready Dockerfile with multi-stage builds:
 
 ```bash
 # Build Docker image
 npm run docker:build
 
-# Run Docker container
+# Run with Docker
 npm run docker:run
-```
 
-Or use Docker Compose:
-
-```bash
-docker-compose up -d
+# Or use Docker Compose
+npm run docker:compose
 ```
 
 ### Cloud Foundry Deployment
@@ -100,104 +345,63 @@ docker-compose up -d
 Deploy to SAP BTP Cloud Foundry:
 
 ```bash
-npm run deploy
+# Login to Cloud Foundry
+cf login -a https://api.cf.eu10.hana.ondemand.com
+
+# Deploy the application
+npm run deploy:cf
 ```
 
-## Ollama Integration
+## Usage
 
-This project includes integration with Ollama for AI-powered purchase order assistance.
+### Standard API
 
-### Setup Ollama
+Access purchase order operations via RESTful endpoints:
 
-1. Install Ollama from [ollama.ai](https://ollama.ai)
-2. Pull the recommended model:
-   ```
-   ollama pull llama3
-   ```
-3. Check if Ollama is accessible from the application:
-   ```
-   npm run ollama:check
-   ```
-
-### Using Ollama with MCP
-
-The integration allows you to:
-- Process natural language queries about purchase orders
-- Generate summaries and insights from purchase order data
-- Get AI assistance for creating and updating purchase orders
-
-See the `ollamaIntegration.js` utility for available functions.
-
-## Cursor IDE Integration
-
-This project includes configuration for Cursor IDE, enhancing the development experience.
-
-### Cursor Features
-
-- Context-aware code completion for SAP APIs
-- Built-in documentation for purchase order data structures
-- Integrated linting and formatting
-- Quick access to SAP documentation
-
-### Setup Cursor
-
-1. Install Cursor IDE from [cursor.sh](https://cursor.sh)
-2. Open the project in Cursor
-3. Run the sync command:
-   ```
-   npm run cursor:sync
-   ```
-
-## Building and Deployment
-
-### Building
-
-To build the application:
 ```
-npm run build
+GET /api/purchaseOrder - List purchase orders
+GET /api/purchaseOrder/:id - Get purchase order by ID
+POST /api/purchaseOrder - Create purchase order
+PUT /api/purchaseOrder/:id - Update purchase order
+DELETE /api/purchaseOrder/:id - Delete purchase order
 ```
 
-This creates a `dist` directory with all necessary files.
+### Health Monitoring
 
-### Deploying to SAP BTP
+The application provides a health check endpoint:
 
-1. Log in to Cloud Foundry:
-   ```
-   cf login -a <API_ENDPOINT> -u <USERNAME> -p <PASSWORD> -o <ORGANIZATION> -s <SPACE>
-   ```
+```
+GET /health - Returns server health status
+```
 
-2. Deploy to BTP:
-   ```
-   npm run deploy
-   ```
+For production monitoring, configure your monitoring solution to poll this endpoint.
 
-Or manually:
-   ```
-   cf push
-   ```
+## Security Considerations
 
-## API Endpoints
+- **API Authentication**: All API endpoints are protected with API key or JWT authentication
+- **HTTPS**: In production, enable HTTPS by setting `ENABLE_HTTPS=true` and providing SSL certificate paths
+- **Rate Limiting**: Configurable rate limiting prevents abuse
+- **Error Handling**: Secure error responses don't leak internal details in production
 
-- `GET /api/purchaseOrder` - Get all purchase orders
-- `GET /api/purchaseOrder/:id` - Get purchase order by ID
-- `POST /api/purchaseOrder` - Create a new purchase order
-- `PUT /api/purchaseOrder/:id` - Update a purchase order
-- `DELETE /api/purchaseOrder/:id` - Delete a purchase order
+## Development
 
-## Configuration
+```bash
+# Run in development mode
+npm run dev
 
-The application is configured using environment variables. See `.env.example` for available options.
+# Run in MCP development mode
+npm run mcp:dev
 
-## API Configuration
+# Run linting
+npm run lint
 
-This service uses the SAP S/4HANA Cloud Purchase Order OData V4 service with API key authentication:
-
-- API Base URL: `https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001/`
-- API Key: Set in environment variables via `.env` file
+# Run tests
+npm run test
+```
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 
 ## License
 
@@ -208,5 +412,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [SAP S/4HANA Cloud APIs](https://api.sap.com/products/SAPS4HANACloud)
 - [SAP Purchase Order API Documentation](https://api.sap.com/api/API_PURCHASEORDER_PROCESS_SRV)
 - [SAP BTP Documentation](https://help.sap.com/docs/btp)
+- [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+- [Anthropic API Documentation](https://docs.anthropic.com/claude/reference)
 - [Ollama Documentation](https://github.com/ollama/ollama/blob/main/docs/api.md)
 - [Cursor IDE Documentation](https://cursor.sh/docs) 

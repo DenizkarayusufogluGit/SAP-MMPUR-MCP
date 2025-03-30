@@ -6,31 +6,50 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "node test.js",
-    "build": "mkdir -p dist && cp -R src config index.js package.json manifest.yml test.js dist/",
-    "deploy": "npm run build && cf push",
+    "test": "jest --coverage",
     "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "build": "mkdir -p dist && cp -R src config index.js package.json package-lock.json dist/",
+    "start:prod": "NODE_ENV=production node index.js",
+    "start:mcp": "NODE_ENV=production node index.js --mcp",
+    "deploy:cf": "cf push",
+    "git:setup": "scripts/setup-git.sh",
+    "docker:build": "docker build -t sap-mmpur-mcp .",
+    "docker:run": "docker run -p 3000:3000 --env-file ./config/.env.production sap-mmpur-mcp",
+    "docker:compose": "docker-compose up -d",
+    "docker:logs": "docker logs -f sap-mmpur-mcp",
+    "clean": "rm -rf node_modules/ dist/ coverage/ logs/*.log",
+    "preinstall": "npm cache clean --force",
+    "prepare": "npm run lint && npm test",
+    "test:coverage": "jest --coverage",
+    "deploy": "npm run build && cf push",
     "format": "prettier --write .",
     "ollama:check": "node -e \"require('./src/util/ollamaIntegration').isAvailable().then(console.log)\"",
     "cursor:sync": "node -e \"console.log('Syncing Cursor IDE configuration...')\"",
-    "prepare": "npm run lint && npm test",
-    "git:setup": "scripts/setup-git.sh",
-    "docker:build": "docker build -t sap-mmpur-mcp .",
-    "docker:run": "docker run -p 3000:3000 --env-file ./config/.env sap-mmpur-mcp"
+    "mcp:start": "ENABLE_MCP=true node index.js",
+    "mcp:dev": "ENABLE_MCP=true nodemon index.js",
+    "mcp:only": "node src/mcp/index.js",
+    "security:audit": "npm audit --production",
+    "prestart:prod": "npm run security:audit"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "dotenv": "^16.3.1",
-    "axios": "^1.6.2",
-    "body-parser": "^1.20.2",
+    "axios": "^0.21.4",
+    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "winston": "^3.11.0"
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "helmet": "^5.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "node-cache": "^5.1.2",
+    "winston": "^3.8.2"
   },
   "devDependencies": {
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
     "eslint": "^8.55.0",
-    "prettier": "^3.1.0"
+    "eslint-plugin-security": "^1.7.1",
+    "prettier": "^3.1.0",
+    "supertest": "^6.3.3"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -54,12 +73,26 @@
     "api",
     "purchase-order",
     "mcp",
-    "cloud"
+    "cloud",
+    "ai",
+    "context-protocol",
+    "model-integration"
   ],
   "author": "SAP-MMPUR-MCP Contributors",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/yourusername/sap-mmpur-mcp/issues"
   },
-  "homepage": "https://github.com/yourusername/sap-mmpur-mcp#readme"
+  "homepage": "https://github.com/yourusername/sap-mmpur-mcp#readme",
+  "jest": {
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
 } 
